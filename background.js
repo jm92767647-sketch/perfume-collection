@@ -10,11 +10,14 @@
   const colors=p.palette.map(rgb),base=colors[0];
   const dark=(base[0]*.299+base[1]*.587+base[2]*.114)*255<122;
   const empty=rgb(p.emptyColor||(dark?'#090a0c':'#fcfcfa'));
-  // Silk mood restores the exact linear color map used before separating the gaps.
-  if(p.colorMapping==='legacy')return Array.from({length:65},(_,i)=>{
-   const x=i/64*(colors.length-1),lo=Math.floor(x),hi=Math.min(colors.length-1,lo+1),u=x-lo;
-   return colors[lo].map((v,c)=>v+(colors[hi][c]-v)*u);
-  });
+  // Reference screenshots used four fragrance colors plus the original warm specular light.
+  if(p.colorMapping==='legacy'||p.colorMapping==='reference'){
+   const anchors=p.colorMapping==='reference'?[...colors,rgb('#fff8e7')]:colors;
+   return Array.from({length:65},(_,i)=>{
+    const x=i/64*(anchors.length-1),lo=Math.floor(x),hi=Math.min(anchors.length-1,lo+1),u=x-lo;
+    return anchors[lo].map((v,c)=>v+(anchors[hi][c]-v)*u);
+   });
+  }
   // Near-black source pixels use each fragrance's separately chosen open-space color.
   const baseStart=['oud-satin-mood','herod'].includes(p.id)?.08:.16;
   const stops=[[0,empty],[.025,empty],[baseStart,base],[.28,base]];

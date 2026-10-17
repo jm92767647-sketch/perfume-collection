@@ -38,6 +38,7 @@
  }
  function renderInfo(i,animate=true){
   const p=PERFUMES[i];selected=i;
+  document.body.classList.toggle('reference-colors',p.colorMapping==='reference');
   const panel=$('#details');panel.getAnimations().forEach(a=>a.cancel());
   panel.innerHTML=`<p class="brand">${p.brand}</p><h2>${p.name}</h2><p class="korean">${p.korean}</p><p class="description">${p.description}</p><p class="accord">${p.accord}</p><p class="notes">${p.notes.join(' · ')}</p><p class="edition">${p.edition}</p>`;
   if(animate&&!paused&&!reduced.matches)panel.animate([{opacity:0,transform:'translateY(10px)'},{opacity:1,transform:'translateY(0)'}],{duration:650,easing:'cubic-bezier(.2,.6,.2,1)'});
