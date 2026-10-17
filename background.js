@@ -41,7 +41,7 @@
   function tick(now){const t=Math.min(1,(now-start)/1400),u=t*t*(3-2*t);apply(target.map((color,i)=>color.map((v,c)=>from[i][c]+(v-from[i][c])*u)));if(t<1)transition=requestAnimationFrame(tick);}
   transition=requestAnimationFrame(tick);
  }
- palette(PERFUMES[0],true);
+ palette(PERFUMES.find(p=>p.id==='724')||PERFUMES[0],true);
  document.addEventListener('perfumechange',e=>palette(e.detail));
  function playback(){if(document.hidden||reduced.matches)video.pause();else video.play().catch(()=>{});}
  video.muted=true;

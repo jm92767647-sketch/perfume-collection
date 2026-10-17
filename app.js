@@ -1,7 +1,8 @@
 (() => {
  'use strict';
  const $=s=>document.querySelector(s), n=PERFUMES.length, reduced=matchMedia('(prefers-reduced-motion: reduce)');
- let selected=0,position=0,animation=0,drag=null,suppressClickUntil=0,lastWheel=0,wheelSum=0,paused=reduced.matches;
+ const initialIndex=Math.max(0,PERFUMES.findIndex(p=>p.id==='724'));
+ let selected=initialIndex,position=initialIndex,animation=0,drag=null,suppressClickUntil=0,lastWheel=0,wheelSum=0,paused=reduced.matches;
  const mod=x=>(x%n+n)%n, delta=x=>mod(x+n/2)-n/2;
  const bottles=$('#bottles'), dots=$('#dots');
  // One envelope for the entire collection keeps both arrows fixed between products.
@@ -90,5 +91,5 @@
  document.querySelectorAll('.matrix-cell').forEach(btn=>btn.addEventListener('click',closePicker));
  pickerTab(true);
 
- renderInfo(0,false);motion();paint();
+ renderInfo(initialIndex,false);motion();paint();
 })();

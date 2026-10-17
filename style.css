@@ -1,7 +1,7 @@
 @font-face{font-family:'DM Sans';src:url('https://jm92767647-sketch.github.io/watch/fonts/dm-sans-variable.ttf') format('truetype');font-weight:100 1000;font-display:swap}
 @font-face{font-family:'S-Core Dream';src:url('https://jm92767647-sketch.github.io/watch/fonts/s-core-dream-regular.woff2') format('woff2');font-weight:400;font-display:swap}
 @font-face{font-family:'S-Core Dream';src:url('https://jm92767647-sketch.github.io/watch/fonts/s-core-dream-medium.woff2') format('woff2');font-weight:500 900;font-display:swap}
-:root{--base:#e8cb76;--a:#d3a145;--b:#b7bd75;--ink:#28312e;--muted:#434d47;font-family:'DM Sans','S-Core Dream',sans-serif;color:var(--ink);font-synthesis:none}
+:root{--base:#e9e7d8;--a:#8db7d7;--b:#d5bb77;--ink:#28312e;--muted:#434d47;font-family:'DM Sans','S-Core Dream',sans-serif;color:var(--ink);font-synthesis:none}
 *{box-sizing:border-box}html,body{margin:0;width:100%;min-height:100%;overscroll-behavior:none}body{background:var(--void,var(--base));-webkit-font-smoothing:antialiased}button,a{-webkit-tap-highlight-color:transparent}button{font:inherit;color:inherit;background:none;border:0;cursor:pointer;touch-action:manipulation}button:focus-visible,a:focus-visible,#stage:focus-visible{outline:2px solid currentColor;outline-offset:4px}button:hover{opacity:.76}[hidden]{display:none!important}.color-filters{position:absolute;pointer-events:none}
 #experience{height:100svh;min-height:640px;overflow:hidden;position:relative;isolation:isolate;transition:color 1.2s ease}
 #atmosphere{position:absolute;inset:0;z-index:-2;overflow:hidden;pointer-events:none;background:var(--void,var(--base));transition:background-color 1.8s ease}
