@@ -42,7 +42,7 @@
   panel.innerHTML=`<p class="brand">${p.brand}</p><h2>${p.name}</h2><p class="korean">${p.korean}</p><p class="description">${p.description}</p><p class="accord">${p.accord}</p><p class="notes">${p.notes.join(' · ')}</p><p class="edition">${p.edition}</p>`;
   if(animate&&!paused&&!reduced.matches)panel.animate([{opacity:0,transform:'translateY(10px)'},{opacity:1,transform:'translateY(0)'}],{duration:650,easing:'cubic-bezier(.2,.6,.2,1)'});
   ['--base','--a','--b'].forEach((key,j)=>document.documentElement.style.setProperty(key,p.palette[j]));
-  const rgb=p.palette[0].match(/[0-9a-f]{2}/gi).map(v=>parseInt(v,16));const dark=(.299*rgb[0]+.587*rgb[1]+.114*rgb[2])<122;document.documentElement.style.setProperty('--ink',dark?'#fffaf1':'#28312e');document.documentElement.style.setProperty('--muted',dark?'#eee7df':'#434d47');
+  const rgb=(p.emptyColor||p.palette[0]).match(/[0-9a-f]{2}/gi).map(v=>parseInt(v,16));const dark=(.299*rgb[0]+.587*rgb[1]+.114*rgb[2])<122;document.documentElement.style.setProperty('--ink',dark?'#fffaf1':'#28312e');document.documentElement.style.setProperty('--muted',dark?'#eee7df':'#434d47');document.documentElement.style.setProperty('--text-halo',dark?'#0009':'#fff9');
   document.dispatchEvent(new CustomEvent('perfumechange',{detail:p}));
   document.querySelectorAll('.picker-item').forEach((el,j)=>el.setAttribute('aria-current',String(j===i)));
   $('#season-label').textContent=p.season;$('#style-label').textContent=p.style;$('#counter').textContent=`${String(i+1).padStart(2,'0')} / ${n}`;

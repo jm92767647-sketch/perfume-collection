@@ -5,17 +5,23 @@
  const channels=['r','g','b'].map(c=>document.querySelector('#tone-'+c));
  const rgb=hex=>hex.match(/[0-9a-f]{2}/gi).map(v=>parseInt(v,16)/255);
  let current=[],transition=0;
- function apply(colors){current=colors;channels.forEach((el,c)=>el.setAttribute('tableValues',colors.map(color=>color[c].toFixed(4)).join(' ')));}
+ function apply(colors){current=colors;channels.forEach((el,c)=>el.setAttribute('tableValues',colors.map(color=>color[c].toFixed(4)).join(' ')));document.documentElement.style.setProperty('--void',`rgb(${colors[0].map(v=>Math.round(v*255)).join(' ')})`);}
  function toneMap(p){
   const colors=p.palette.map(rgb),base=colors[0];
   const dark=(base[0]*.299+base[1]*.587+base[2]*.114)*255<122;
-  const empty=rgb(dark?'#090a0c':'#fcfcfa');
-  document.documentElement.style.setProperty('--void',dark?'#090a0c':'#fcfcfa');
-  // The film's near-black pixels are open space, not a colored reflective surface.
-  const stops=[[0,empty],[.025,empty],[.08,base],[.28,base]];
+  const empty=rgb(p.emptyColor||(dark?'#090a0c':'#fcfcfa'));
+  // Silk mood restores the exact linear color map used before separating the gaps.
+  if(p.colorMapping==='legacy')return Array.from({length:65},(_,i)=>{
+   const x=i/64*(colors.length-1),lo=Math.floor(x),hi=Math.min(colors.length-1,lo+1),u=x-lo;
+   return colors[lo].map((v,c)=>v+(colors[hi][c]-v)*u);
+  });
+  // Near-black source pixels use each fragrance's separately chosen open-space color.
+  const baseStart=['oud-satin-mood','herod'].includes(p.id)?.08:.16;
+  const stops=[[0,empty],[.025,empty],[baseStart,base],[.28,base]];
   const accents=colors.slice(1);
   accents.forEach((color,i)=>stops.push([.44+i*.44/Math.max(1,accents.length-1),color]));
   stops.push([1,accents.at(-1).map(v=>v+(1-v)*.2)]);
+  if(p.orangeBoost)stops.splice(0,stops.length,[0,empty],[.025,empty],[.13,base],[.20,base],[.36,accents[0]],[.50,accents[1]],[.86,accents[1]],[1,accents[1].map(v=>v+(1-v)*.2)]);
   // A fixed-size table also allows smooth transitions between 3-, 4-, and 5-color palettes.
   return Array.from({length:65},(_,i)=>{
    const t=i/64,hi=stops.findIndex(s=>s[0]>=t);
