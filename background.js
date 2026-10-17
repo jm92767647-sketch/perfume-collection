@@ -2,10 +2,10 @@
 (()=>{
  'use strict';
  const video=document.querySelector('#background-video'),reduced=matchMedia('(prefers-reduced-motion: reduce)');
- const channels=['r','g','b'].map(c=>document.querySelector('#tone-'+c));
+ const renderer=window.createFragranceRenderer(video,reduced);
  const rgb=hex=>hex.match(/[0-9a-f]{2}/gi).map(v=>parseInt(v,16)/255);
  let current=[],transition=0;
- function apply(colors){current=colors;channels.forEach((el,c)=>el.setAttribute('tableValues',colors.map(color=>color[c].toFixed(4)).join(' ')));document.documentElement.style.setProperty('--void',`rgb(${colors[0].map(v=>Math.round(v*255)).join(' ')})`);}
+ function apply(colors){current=colors;document.documentElement.style.setProperty('--void',`rgb(${colors[0].map(v=>Math.round(v*255)).join(' ')})`);renderer.setColors(colors);}
  function toneMap(p){
   const colors=p.palette.map(rgb),base=colors[0];
   const dark=(base[0]*.299+base[1]*.587+base[2]*.114)*255<122;

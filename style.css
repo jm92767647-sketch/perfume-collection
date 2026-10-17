@@ -5,7 +5,7 @@
 *{box-sizing:border-box}html,body{margin:0;width:100%;min-height:100%;overscroll-behavior:none}body{background:var(--void,var(--base));-webkit-font-smoothing:antialiased}button,a{-webkit-tap-highlight-color:transparent}button{font:inherit;color:inherit;background:none;border:0;cursor:pointer;touch-action:manipulation}button:focus-visible,a:focus-visible,#stage:focus-visible{outline:2px solid currentColor;outline-offset:4px}button:hover{opacity:.76}[hidden]{display:none!important}.color-filters{position:absolute;pointer-events:none}
 #experience{height:100svh;min-height:640px;overflow:hidden;position:relative;isolation:isolate;transition:color 1.2s ease}
 #atmosphere{position:absolute;inset:0;z-index:-2;overflow:hidden;pointer-events:none;background:var(--void,var(--base));transition:background-color 1.8s ease}
-#background-video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:70% center;filter:url(#fragrance-color)}
+#background-video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:70% center;opacity:0;pointer-events:none;filter:none}
 #wash{position:absolute;inset:0;background:radial-gradient(ellipse at 47% 40%,#ffffff12,transparent 64%);pointer-events:none}
 header{position:absolute;top:26px;left:3.5%;right:3.5%;display:flex;justify-content:space-between;align-items:center;gap:18px;z-index:10}
 h1{font-size:19px;letter-spacing:.04em;font-weight:600;white-space:nowrap;margin:0;line-height:1.35}
@@ -40,3 +40,5 @@ header,#details,.position,#navigation,#product-controls{text-shadow:0 1px 5px va
 @media(max-width:360px){header{left:14px;right:14px}#details h2{font-size:28px}.cell-name{font-size:8px}.matrix-style{font-size:9px}}
 @media(max-height:730px) and (min-width:701px){#experience{min-height:580px}#details{top:22%}#details .brand{margin-bottom:8px}#details .korean{margin-bottom:17px}#details .description{font-size:12px;margin-bottom:15px}#details .edition{margin-top:12px}#navigation{bottom:12px}}
 @media(prefers-reduced-motion:reduce){.bottle-image{animation:none!important}*,*:before,*:after{scroll-behavior:auto!important;transition-duration:0s!important}}
+
+#background-canvas{position:absolute;inset:0;width:100%;height:100%;display:block;pointer-events:none}
