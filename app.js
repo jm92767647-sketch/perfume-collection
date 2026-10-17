@@ -4,6 +4,11 @@
  let selected=0,position=0,animation=0,drag=null,suppressClickUntil=0,lastWheel=0,wheelSum=0,paused=reduced.matches;
  const mod=x=>(x%n+n)%n, delta=x=>mod(x+n/2)-n/2;
  const bottles=$('#bottles'), dots=$('#dots');
+ // One envelope for the entire collection keeps both arrows fixed between products.
+ const collectionHalfWidth=Math.max(...PERFUMES.map(p=>{
+  const xs=(p.clip.match(/[\d.]+(?=%)/g)||[]).map(Number).filter((_,i)=>i%2===0);
+  return Math.max(50-Math.min(...xs),Math.max(...xs)-50)/100*p.width/p.height/(p.bottom-p.top);
+ }));
  const items=PERFUMES.map((p,i)=>{
   const el=document.createElement('div');el.className='bottle';el.setAttribute('aria-hidden','true');
   const frame=document.createElement('div');frame.className='bottle-frame';
@@ -15,6 +20,9 @@
  function dimensions(){const mobile=innerWidth<=700;return {h:mobile?Math.min(290,$('#stage').clientHeight*.82):Math.min(515,$('#stage').clientHeight*.79),r:mobile?innerWidth*.96:Math.min(innerWidth*.46,820),angle:mobile?1.17:1.03};}
  function paint(){
   const {h,r,angle}=dimensions();
+  const center=$('#bottles'),x=center.offsetLeft;
+  const gap=Math.min(collectionHalfWidth*h+(innerWidth<=700?52:66),x-24,innerWidth-x-24);
+  $('#product-controls').style.cssText=`--product-x:${x}px;--product-y:${center.offsetTop+h*.36}px;--product-gap:${gap}px`;
   items.forEach(({el,frame,img,dot},i)=>{
    const d=delta(i-position),a=d*angle,visible=Math.abs(d)<1.95;
    el.style.display=visible?'block':'none';
@@ -24,7 +32,7 @@
     el.style.zIndex=String(Math.round(100-Math.abs(d)*20));el.classList.toggle('secondary',Math.abs(d)>.1);
     const p=PERFUMES[i],fh=h/(p.bottom-p.top);frame.style.height=fh+'px';frame.style.width=fh*p.width/p.height+'px';frame.style.marginTop=((.5-(p.top+p.bottom)/2)*fh)+'px';
    }
-   const da=delta(i-position)*.145, dr=Math.min(240,dots.clientWidth*.66),show=Math.abs(delta(i-position))<=6.8;
+   const da=delta(i-position)*.145, dr=Math.min(160,dots.clientWidth*.58),show=Math.abs(delta(i-position))<=6.8;
    dot.hidden=!show;dot.style.transform=`translate(${Math.sin(da)*dr}px,${(1-Math.cos(da))*dr*.38}px)`;
   });
  }
@@ -33,7 +41,7 @@
   const panel=$('#details');panel.getAnimations().forEach(a=>a.cancel());
   panel.innerHTML=`<p class="brand">${p.brand}</p><h2>${p.name}</h2><p class="korean">${p.korean}</p><p class="description">${p.description}</p><p class="accord">${p.accord}</p><p class="notes">${p.notes.join(' · ')}</p><p class="edition">${p.edition}</p>`;
   if(animate&&!paused&&!reduced.matches)panel.animate([{opacity:0,transform:'translateY(10px)'},{opacity:1,transform:'translateY(0)'}],{duration:650,easing:'cubic-bezier(.2,.6,.2,1)'});
-  ['--base','--a','--b','--c'].forEach((key,j)=>document.documentElement.style.setProperty(key,p.palette[j]));
+  ['--base','--a','--b'].forEach((key,j)=>document.documentElement.style.setProperty(key,p.palette[j]));
   const rgb=p.palette[0].match(/[0-9a-f]{2}/gi).map(v=>parseInt(v,16));const dark=(.299*rgb[0]+.587*rgb[1]+.114*rgb[2])<122;document.documentElement.style.setProperty('--ink',dark?'#fffaf1':'#28312e');document.documentElement.style.setProperty('--muted',dark?'#eee7df':'#434d47');
   document.dispatchEvent(new CustomEvent('perfumechange',{detail:p}));
   document.querySelectorAll('.picker-item').forEach((el,j)=>el.setAttribute('aria-current',String(j===i)));
@@ -59,32 +67,27 @@
  const matrix=$('#matrix');matrix.append(document.createElement('div'));
  SEASONS.forEach(s=>{const el=document.createElement('div');el.className='matrix-header';el.textContent=s;matrix.append(el)});
  STYLES.forEach((s,row)=>{const label=document.createElement('div');label.className='matrix-style';label.textContent=s;matrix.append(label);PERFUMES.slice(row*4,row*4+4).forEach((p,col)=>{const i=row*4+col,btn=document.createElement('button');btn.className='matrix-cell';btn.setAttribute('aria-label',`${p.korean}, ${p.season}, ${p.style}`);btn.innerHTML=`<span class="cell-name">${p.name}</span>`;btn.title=p.korean;btn.onclick=()=>{go(i)};matrix.append(btn);});});
- const sourceList=$('#source-list');PERFUMES.forEach(p=>{const li=document.createElement('li');const a=document.createElement('a');a.href=p.source;a.target='_blank';a.rel='noopener noreferrer';a.textContent=`${p.brand} — ${p.name}`;li.append(a);if(p.noteDisclosure){li.append(document.createElement('br'),p.noteDisclosure);const b=document.createElement('a');b.href=p.noteSource;b.target='_blank';b.rel='noopener noreferrer';b.textContent=' 보조 자료';li.append(b)}sourceList.append(li)});
- function openDialog(id,opener){const d=$(id);d.showModal();document.body.classList.add('modal-open');opener.setAttribute('aria-expanded','true');d.querySelector('.close').focus();}
- $('#credits-toggle').onclick=()=>openDialog('#sources-dialog',$('#credits-toggle'));
- document.querySelectorAll('dialog').forEach(d=>{d.querySelector('.close').onclick=()=>d.close();d.addEventListener('click',e=>{if(e.target===d){const b=d.getBoundingClientRect();if(e.clientX<b.left||e.clientX>b.right||e.clientY<b.top||e.clientY>b.bottom)d.close();}});d.addEventListener('close',()=>{document.body.classList.remove('modal-open');$('#map-toggle').setAttribute('aria-expanded','false');$('#credits-toggle').setAttribute('aria-expanded','false');});});
- function motion(){document.body.classList.toggle('paused',paused);$('#motion-toggle').textContent=paused?'Motion off':'Motion on';$('#motion-toggle').setAttribute('aria-pressed',String(paused));}
- $('#motion-toggle').onclick=()=>{paused=!paused;motion();if(paused){cancelAnimationFrame(animation);position=selected;paint();}};reduced.addEventListener('change',()=>{paused=reduced.matches;motion();cancelAnimationFrame(animation);position=selected;paint();});
+ function motion(){document.body.classList.toggle('paused',paused);}
+ reduced.addEventListener('change',()=>{paused=reduced.matches;motion();cancelAnimationFrame(animation);position=selected;paint();});
+ ['#previous','#next'].forEach(id=>$(id).addEventListener('pointerdown',e=>e.stopPropagation()));
  addEventListener('resize',paint);document.addEventListener('visibilitychange',()=>{document.body.classList.toggle('paused',paused||document.hidden)});
 
- const anchor=$('#collection-anchor'), picker=$('#perfume-picker'), trigger=$('#map-toggle');let pinned=false,closeTimer=0;
- function openPicker(pin=false){clearTimeout(closeTimer);if(pin)pinned=true;picker.hidden=false;trigger.setAttribute('aria-expanded','true');picker.dataset.pinned=String(pinned);}
- function closePicker(focus=false){clearTimeout(closeTimer);pinned=false;picker.hidden=true;trigger.setAttribute('aria-expanded','false');if(focus)trigger.focus();}
- anchor.addEventListener('pointerenter',e=>{if(e.pointerType==='mouse')openPicker()});
- anchor.addEventListener('pointerleave',e=>{if(e.pointerType==='mouse'&&!pinned)closeTimer=setTimeout(()=>{if(!picker.contains(document.activeElement))closePicker()},220)});
- trigger.onclick=()=>{if(pinned&&!picker.hidden)closePicker();else openPicker(true)};
- trigger.addEventListener('keydown',e=>{if(e.key==='ArrowDown'){e.preventDefault();openPicker(true);picker.querySelector('.picker-item').focus()}});
- $('#picker-close').onclick=()=>closePicker(true);
- document.addEventListener('pointerdown',e=>{if(!picker.hidden&&!anchor.contains(e.target))closePicker()});
- document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!picker.hidden){e.preventDefault();closePicker(true)}});
- anchor.addEventListener('focusout',()=>setTimeout(()=>{if(!pinned&&!anchor.contains(document.activeElement)&&!anchor.matches(':hover'))closePicker()},0));
+ const picker=$('#perfume-picker'), trigger=$('#map-toggle');
+ function openPicker(){if(picker.open)return;pickerTab(true);picker.showModal();trigger.setAttribute('aria-expanded','true');$('#category-tab').focus();}
+ function closePicker(){picker.close();}
+ trigger.onclick=openPicker;
+ trigger.addEventListener('keydown',e=>{if(e.key==='ArrowDown'){e.preventDefault();openPicker()}});
+ $('#picker-close').onclick=closePicker;
+ picker.addEventListener('close',()=>{trigger.setAttribute('aria-expanded','false');trigger.focus();});
+ picker.addEventListener('click',e=>{if(e.target!==picker)return;const b=picker.getBoundingClientRect();if(e.clientX<b.left||e.clientX>b.right||e.clientY<b.top||e.clientY>b.bottom)closePicker();});
  PERFUMES.forEach((p,i)=>{const btn=document.createElement('button');btn.className='picker-item';btn.setAttribute('aria-label',p.korean);btn.setAttribute('aria-current',String(i===selected));
  const preview=document.createElement('span');preview.className='picker-thumb';const img=new Image();img.src=p.image;img.alt='';img.style.clipPath=p.clip;const fh=46/(p.bottom-p.top);img.style.height=fh+'px';img.style.top=(23-(p.top+p.bottom)*fh/2)+'px';preview.append(img);
- const text=document.createElement('span');text.innerHTML=`<small>${p.brand}</small><span>${p.name}</span>`;btn.append(preview,text);btn.onclick=()=>{openPicker(true);go(i)};$('#picker-list').append(btn)});
+ const text=document.createElement('span');text.innerHTML=`<small>${p.brand}</small><span>${p.name}</span>`;btn.append(preview,text);btn.onclick=()=>{go(i);closePicker()};$('#picker-list').append(btn)});
  $('#picker-categories').append(matrix);
  function pickerTab(categories){$('#picker-list').hidden=categories;$('#picker-categories').hidden=!categories;$('#list-tab').setAttribute('aria-pressed',String(!categories));$('#category-tab').setAttribute('aria-pressed',String(categories));}
- $('#list-tab').onclick=()=>{openPicker(true);pickerTab(false)};$('#category-tab').onclick=()=>{openPicker(true);pickerTab(true)};
- document.querySelectorAll('.matrix-cell').forEach(btn=>btn.addEventListener('click',()=>openPicker(true)));
+ $('#list-tab').onclick=()=>pickerTab(false);$('#category-tab').onclick=()=>pickerTab(true);
+ document.querySelectorAll('.matrix-cell').forEach(btn=>btn.addEventListener('click',closePicker));
+ pickerTab(true);
 
  renderInfo(0,false);motion();paint();
 })();
