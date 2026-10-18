@@ -25,6 +25,8 @@
   accents.forEach((color,i)=>stops.push([.44+i*.44/Math.max(1,accents.length-1),color]));
   stops.push([1,accents.at(-1).map(v=>v+(1-v)*.2)]);
   if(p.orangeBoost)stops.splice(0,stops.length,[0,empty],[.025,empty],[.13,base],[.20,base],[.36,accents[0]],[.50,accents[1]],[.86,accents[1]],[1,accents[1].map(v=>v+(1-v)*.2)]);
+  // Separate the open background, shaded folds and lit faces on these two fragrances.
+  if(p.colorMapping==='sculpted')stops.splice(0,stops.length,[0,empty],[.06,empty],[.12,base],[.24,base],[.32,accents[0].map(v=>v*.82)],[.62,accents[0]],[.76,accents[1]],[.92,accents[1]],[1,accents[1].map(v=>v+(1-v)*.3)]);
   // A fixed-size table also allows smooth transitions between 3-, 4-, and 5-color palettes.
   return Array.from({length:65},(_,i)=>{
    const t=i/64,hi=stops.findIndex(s=>s[0]>=t);
@@ -50,3 +52,4 @@
  reduced.addEventListener('change',playback);
  playback();
 })();
+
