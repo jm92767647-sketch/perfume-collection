@@ -5,8 +5,10 @@
 *{box-sizing:border-box}html,body{margin:0;width:100%;min-height:100%;overscroll-behavior:none}body{background:var(--void,var(--base));-webkit-font-smoothing:antialiased}button,a{-webkit-tap-highlight-color:transparent}button{font:inherit;color:inherit;background:none;border:0;cursor:pointer;touch-action:manipulation}button:focus-visible,a:focus-visible,#stage:focus-visible{outline:2px solid currentColor;outline-offset:4px}button:hover{opacity:.76}[hidden]{display:none!important}.color-filters{position:absolute;pointer-events:none}
 #experience{height:100svh;min-height:640px;overflow:hidden;position:relative;isolation:isolate;transition:color 1.2s ease}
 #atmosphere{position:absolute;inset:0;z-index:-2;overflow:hidden;pointer-events:none;background:var(--void,var(--base));transition:background-color 1.8s ease}
-#background-video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:70% center;opacity:0;pointer-events:none;filter:none}
-#wash{position:absolute;inset:0;background:radial-gradient(ellipse at 47% 40%,#ffffff12,transparent 64%);pointer-events:none}
+#background-video{position:absolute;inset:0;z-index:0;width:100%;height:100%;object-fit:cover;object-position:70% center;pointer-events:none}
+/* Keep the source video in the viewport for autoplay, with its uncolored pixels covered. */
+#atmosphere::before{content:'';position:absolute;inset:0;z-index:1;background:var(--void,var(--base));background-image:inherit}
+#wash{position:absolute;inset:0;z-index:3;background:radial-gradient(ellipse at 47% 40%,#ffffff12,transparent 64%);pointer-events:none}
 header{position:absolute;top:26px;left:3.5%;right:3.5%;display:flex;justify-content:space-between;align-items:center;gap:18px;z-index:10}
 h1{font-size:19px;letter-spacing:.04em;font-weight:600;white-space:nowrap;margin:0;line-height:1.35}
 #map-toggle{display:flex;align-items:center;gap:10px;font-size:13px;padding:10px 0 10px 12px;white-space:nowrap}.count{font-size:10px;opacity:.62;font-variant-numeric:tabular-nums}
@@ -41,17 +43,8 @@ header,#details,.position,#navigation,#product-controls{text-shadow:0 1px 5px va
 @media(max-height:730px) and (min-width:701px){#experience{min-height:580px}#details{top:22%}#details .brand{margin-bottom:8px}#details .korean{margin-bottom:17px}#details .description{font-size:12px;margin-bottom:15px}#details .edition{margin-top:12px}#navigation{bottom:12px}}
 @media(prefers-reduced-motion:reduce){.bottle-image{animation:none!important}*,*:before,*:after{scroll-behavior:auto!important;transition-duration:0s!important}}
 
-#background-canvas{position:absolute;inset:0;width:100%;height:100%;display:block;pointer-events:none}
-/* Keep the colored background moving even if mobile video playback is unavailable. */
-#atmosphere:not([data-background-ready])::before{content:'';position:absolute;inset:0;background:inherit}
+#background-canvas{position:absolute;inset:0;z-index:2;width:100%;height:100%;display:block;pointer-events:none}
 #background-canvas:not([data-source]){visibility:hidden}
-@media(prefers-reduced-motion:no-preference){
- #background-canvas[data-source="poster"],#atmosphere:not([data-background-ready])::before{animation:background-drift 7s linear infinite alternate}
-}
-@keyframes background-drift{
- from{transform:translate3d(-2.5%,-1.5%,0) scale(1.13) rotate(-1.5deg)}
- to{transform:translate3d(2.5%,1.5%,0) scale(1.19) rotate(1.5deg)}
-}
 .matrix-style{position:relative;align-self:stretch;min-width:0;min-height:0}
 .style-copy{position:absolute;inset:0 10px 0 0;display:flex;flex-direction:column;justify-content:center}
 .style-name{display:block;font:inherit;line-height:1.35}

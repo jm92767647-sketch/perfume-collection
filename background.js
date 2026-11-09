@@ -46,22 +46,25 @@
  palette(PERFUMES.find(p=>p.id==='724')||PERFUMES[0],true);
  document.addEventListener('perfumechange',e=>palette(e.detail));
  const mayPlay=()=>!document.hidden&&!reduced.matches;
- let startupTimer=0;
+ let startupTimer=0,reloadedSource=false,autoplayDenied=false;
  function resume(){
   if(!mayPlay()||!video.paused)return;
   video.muted=true;
-  video.play().catch(()=>{}); // Readiness, visibility and user gestures can each allow a later attempt.
+  video.play().then(()=>{autoplayDenied=false;},error=>{if(error.name==='NotAllowedError')autoplayDenied=true;});
  }
  function startPlayback(){
   clearTimeout(startupTimer);
   if(!mayPlay()){video.pause();return;}
-  const initialTime=video.currentTime,delays=[350,900,1800];
+  const initialTime=video.currentTime,delays=[350,900,1800,2400];
   resume();
   function check(i){
    startupTimer=setTimeout(()=>{
     if(!mayPlay()||(!video.paused&&video.currentTime!==initialTime))return;
-    // A decoder can report playing before the first frame actually advances.
-    if(i===delays.length-1&&!video.paused&&video.readyState>=2)video.pause();
+    // Recover a stalled initial media load without reloading the collection page.
+    if(i===delays.length-1&&!reloadedSource&&!autoplayDenied&&video.currentTime===0&&initialTime===0){
+     reloadedSource=true;
+     video.load();
+    }
     resume();
     if(i+1<delays.length)check(i+1);
    },delays[i]);

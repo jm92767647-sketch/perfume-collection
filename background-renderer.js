@@ -3,18 +3,6 @@ window.createFragranceRenderer=function(video,reduced){
  'use strict';
  const host=video.parentElement,poster=new Image();
  let canvas=document.createElement('canvas'),backend=null,colors=null,dirty=true,lastTime=-1,lastDraw=0;
- let mediaTime=-1,lastFrameAt=-Infinity;
- // A running media clock alone does not guarantee that the browser is decoding frames.
- const hasFrameCallback=typeof video.requestVideoFrameCallback==='function';
- function observeFrame(now,time){
-  if(time===mediaTime)return;
-  if(mediaTime>=0)lastFrameAt=now;
-  mediaTime=time;
- }
- if(hasFrameCallback){
-  function onFrame(now,frame){observeFrame(now,frame.mediaTime);video.requestVideoFrameCallback(onFrame);}
-  video.requestVideoFrameCallback(onFrame);
- }
  canvas.id='background-canvas';canvas.setAttribute('aria-hidden','true');host.insertBefore(canvas,video.nextSibling);
  poster.crossOrigin='anonymous';poster.src=video.poster;poster.onload=()=>{dirty=true;};
  function cover(source,w,h){
@@ -46,7 +34,7 @@ window.createFragranceRenderer=function(video,reduced){
   return{kind:'canvas2d',setColors(values){for(let i=0;i<4096;i++){const x=i/4095*64,lo=Math.floor(x),hi=Math.min(64,lo+1),t=x-lo;for(let c=0;c<3;c++)lookup[i*3+c]=(values[lo][c]+(values[hi][c]-values[lo][c])*t)*255;}},
    draw(source){const g=cover(source,canvas.width,canvas.height);if(!g)return false;ctx.drawImage(source,g.dx,g.dy,g.dw,g.dh);const image=ctx.getImageData(0,0,canvas.width,canvas.height),p=image.data;for(let i=0;i<p.length;i+=4){const j=Math.min(4095,Math.round((p[i]*.213+p[i+1]*.715+p[i+2]*.072)/255*4095))*3;p[i]=lookup[j];p[i+1]=lookup[j+1];p[i+2]=lookup[j+2];p[i+3]=255;}ctx.putImageData(image,0,0);return true;}};
  }
- function replaceCanvas(){const next=document.createElement('canvas');next.id='background-canvas';next.setAttribute('aria-hidden','true');canvas.replaceWith(next);canvas=next;delete host.dataset.backgroundReady;}
+ function replaceCanvas(){const next=document.createElement('canvas');next.id='background-canvas';next.setAttribute('aria-hidden','true');canvas.replaceWith(next);canvas=next;}
  function fallbackCPU(){
   replaceCanvas();
   try{backend=makeCPU();canvas.dataset.renderer=backend.kind;resize();if(colors)backend.setColors(colors);dirty=true;}
@@ -61,14 +49,14 @@ window.createFragranceRenderer=function(video,reduced){
  function paint(now){
   requestAnimationFrame(paint);if(document.hidden||!colors)return;
   const interval=backend?.kind==='webgl'?1000/24:1000/12;if(now-lastDraw<interval)return;
-  if(!hasFrameCallback&&video.readyState>=2&&!video.paused)observeFrame(now,video.currentTime);
-  const live=!reduced.matches&&!video.paused&&video.readyState>=2&&now-lastFrameAt<850;
-  const source=live?video:poster,time=live?mediaTime:-1;
+  // Canvas playback need not wait for a compositor frame callback from the covered video.
+  const live=!reduced.matches&&video.readyState>=2&&video.currentTime>0;
+  const source=live?video:poster,time=live?video.currentTime:-1;
   if(!dirty&&time===lastTime)return;
   if(!live&&(!poster.complete||!poster.naturalWidth))return;
   if(!backend)return;
-  try{if(backend.draw(source)){lastDraw=now;lastTime=time;dirty=false;canvas.dataset.source=live?'video':'poster';canvas.dataset.colored='true';host.dataset.backgroundReady='true';}}
-  catch{if(backend.kind==='webgl')fallbackCPU();else{backend=null;canvas.dataset.renderer='palette-fallback';canvas.style.display='none';delete host.dataset.backgroundReady;}}
+  try{if(backend.draw(source)){lastDraw=now;lastTime=time;dirty=false;canvas.dataset.source=live?'video':'poster';canvas.dataset.colored='true';}}
+  catch{if(backend.kind==='webgl')fallbackCPU();else{backend=null;canvas.dataset.renderer='palette-fallback';canvas.style.display='none';}}
  }
  addEventListener('resize',resize);video.addEventListener('loadeddata',()=>{dirty=true;});reduced.addEventListener('change',()=>{dirty=true;});requestAnimationFrame(paint);
  return{setColors(values){colors=values;dirty=true;backend?.setColors(values);const picks=[values[0],values[24],values[46]].map(c=>'rgb('+c.map(v=>Math.round(v*255)).join(' ')+')');host.style.background=`radial-gradient(ellipse at 76% 44%,${picks[2]},transparent 58%),radial-gradient(ellipse at 18% 75%,${picks[1]},transparent 60%),${picks[0]}`;canvas.dataset.palette=values[0].map(v=>Math.round(v*255)).join(',');}};
